@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>iTWA</title>
+</head>
+<body>
+	<h1>iTWA</h1>
+	<!-- ?php for ($i=1; $i<10; ++$i) { ?>
+		<a class="chip" href="?page=<?= $i; ?>">Page: <?= $i; ?></a>
+	<?php } ? -->
+	<div id="pages"></div>
+	<span class="chip" onclick="alert('Test alert')">Alert</span>
+	<!--a class="chip" href="?cache=upgrade">Update cache</a-->
+	<a class="chip" target="_blank" href="https://google.com/">Google</a>
+	<span class="chip" onclick="itwa.auth()">Auth</span>
+	<span class="chip" onclick="itwa.gps()">Gps</span>
+	<span class="chip" onclick="itwa.push()">Push</span>
+	<pre id="debug"></pre>
+	<pre id="gps"></pre>
+	<pre id="auth"></pre>
+	<textarea></textarea>
+	<style>
+		.chip {
+			letter-spacing: .0178571429em;
+			color: #333;
+			border-radius: 1rem;
+			background-color: #e0e0e0;
+			padding: 0 12px;
+			margin: 4px;
+			outline: 0;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		pre, textarea {
+			border: 1px solid #283142;
+			margin: 16px -8px;
+			padding: 12px 8px;
+			white-space: pre-wrap;
+		}
+		pre:not(.prettyprint), pre:not(.prettyprint) + textarea {
+			display: none;
+		}
+		textarea {
+			width: 100%;
+			margin: 16px -10px;
+		}
+	</style>
+	<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-messaging.js"></script>
+	<script>
+		/*
+		if (!document.documentElement.getAttribute('manifest') && ('serviceWorker' in navigator))
+			window.addEventListener('load', function() {
+				navigator.serviceWorker.register('cache.js').then(function(reg, err) {
+				});
+			});
+		*/
+		window.itwa = {
+			debug: function(key, value) {
+				var el = document.querySelector('#'+key);
+				el.innerHTML = JSON.stringify(value, null, '\t');
+				if ('PR' in window)
+					PR.prettyPrint(el.classList.add('prettyprint'));
+			},
+			index: function() {
+				var pages = document.querySelector('#pages');
+				for (var i=1; i<10; ++i) {
+					pages.innerHTML += '<a class="chip" href="?page='+i+'">Page: '+i+'</a>';
+				}
+				window.itwa.debug('debug', {
+					page: parseInt(location.search.replace('?page=', '') || '0'),
+					// 'page' => (empty($_GET['page']) ? 0 : $_GET['page']),
+					// 'app' => (((strpos($referer, 'android-app://') === 0) || (substr_compare($ua, 'itwa', -strlen('itwa')) === 0)) ? 1 : 0),
+					// 'app_os' => (stripos($ua, 'Android') ? 'Android' : (stripos($ua, 'iPhone') ? 'iPhone' : 'null')),
+					// 'user_agent' => $ua,
+					// 'headers' => getallheaders()
+					app: (document.referrer.startsWith('android-app://') || navigator.userAgent.endsWith('itwa')),
+					app_os: (navigator.userAgent.match('Android') ? 'Android' : (navigator.userAgent.match('iPhone') ? 'iPhone' : null)),
+					user_agent: navigator.userAgent
+				});
+				console.log('onload');
+			},
+			jwt: function(token) { // https://jwt.io/
+				return JSON.parse(atob(token.split('.')[1]));
+			},
+			auth: function(data, time) {
+				if (data) {
+					try {
+						data.parse = itwa.jwt(data.token);
+					} catch (e) {}
+					window.itwa.debug('auth', data);
+					if (data.token)
+						document.querySelector('#auth + textarea').value = data.token;
+				}else if (('webkit' in window) && ('messageHandlers' in webkit) && ('itwa' in webkit.messageHandlers))
+					webkit.messageHandlers.itwa.postMessage('$auth$');
+				else
+					throw new Error('Not found js bridge');
+			},
+			gps: function(data, time) {
+				if (data)
+					window.itwa.debug('gps', data);
+				else if (('webkit' in window) && ('messageHandlers' in webkit) && ('itwa' in webkit.messageHandlers))
+					webkit.messageHandlers.itwa.postMessage('$gps$');
+				else
+					throw new Error('Not found js bridge');
+			},
+			push: async function() {
+				let key = 'AAAAb-JBOno:APA91bFCjRrWjhsa7jR9UC-JOhA9wT7IqzYy5V4DAY9D6HEz22Nh_sKuGCXODqn1I8GpQXmdOmbM_0qD8joPEjaymzp8BqFeNtdzgPgxxBcQnn7qg4QBJo3TbQEI3HmiZDilvN2qapW0';
+				if (!itwa.push_) {
+					let app = firebase.initializeApp({
+						apiKey: "AIzaSyCgJ0l6FCW2HaVaBV5Pnb5RdhiVhY3ejS0",
+						authDomain: "itwa-170d1.firebaseapp.com",
+						projectId: "itwa-170d1",
+						storageBucket: "itwa-170d1.appspot.com",
+						messagingSenderId: "480537295482",
+						appId: "1:480537295482:web:f2eb3ef0581651bb8219c3"
+					});
+					if (await Notification.requestPermission() !== 'granted')
+						console.log('user denied notifications');
+					itwa.push_ = await app.messaging().getToken();
+					console.log({
+						token: itwa.push_
+					});
+				}
+				let push = (await fetch('https://fcm.googleapis.com/fcm/send', {
+					method: 'POST',
+					headers: {
+						'Authorization': 'key='+key,
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						to: itwa.push_,
+						notification: {
+							title: 'Title: '+document.title,
+							body: 'Body: '+new Date().toString()
+						}
+					})
+				})).json();
+				console.log({ push });
+				return push;
+			}
+		}
+		window.itwa.index();
+	</script>
+</body>
+</html>
