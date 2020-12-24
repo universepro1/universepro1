@@ -126,6 +126,15 @@
 						token: itwa.push_
 					});
 				}
+				/*
+				let push = (await fetch('/api/push', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						token: (token || await enablePush())
+					})
+				})).json();
+				*/
 				let push = (await fetch('https://fcm.googleapis.com/fcm/send', {
 					method: 'POST',
 					headers: {

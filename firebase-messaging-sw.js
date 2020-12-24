@@ -1,5 +1,5 @@
 self.addEventListener("push", event => { event.waitUntil(onPush(event)) });
-// self.addEventListener("notificationclick", event => { event.waitUntil(onNotificationClick(event)) });
+self.addEventListener("notificationclick", event => { event.waitUntil(onNotificationClick(event)) });
 
 async function onPush(event) {
 	try {
@@ -7,6 +7,7 @@ async function onPush(event) {
 		console.log('push json received: ', json)
 		self.registration.showNotification(json.notification.title, {
 			body: json.notification.body,
+			icon: json.notification.icon,
 			sound: json.notification.sound
 		});
 	} catch (e) {
@@ -15,4 +16,7 @@ async function onPush(event) {
 		console.log('push text received: ', text);
 		await self.registration.showNotification(text);
 	}
+}
+async function onNotificationClick(event) {
+	console.log('push click: ', event);
 }
