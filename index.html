@@ -72,7 +72,7 @@
 					pages.innerHTML += '<a class="chip" href="?page='+i+'">Page: '+i+'</a>';
 				}
 				window.itwa.debug('debug', {
-					page: parseInt(location.search.replace('?page=', '') || '0'),
+					query: Object.fromEntries(new URLSearchParams(location.search)),
 					// 'page' => (empty($_GET['page']) ? 0 : $_GET['page']),
 					// 'app' => (((strpos($referer, 'android-app://') === 0) || (substr_compare($ua, 'itwa', -strlen('itwa')) === 0)) ? 1 : 0),
 					// 'app_os' => (stripos($ua, 'Android') ? 'Android' : (stripos($ua, 'iPhone') ? 'iPhone' : 'null')),
@@ -147,7 +147,16 @@
 							title: 'Title: '+document.title,
 							body: 'Body: '+new Date().toString(),
 							icon: 'icon.png',
-							click_action: location.origin+'/?page=100'
+							click_action: location.origin+'/?page=100',
+							data: '?page=100',
+							actions: [{
+								title: 'Open',
+								action: 'open'
+							}, {
+								title: 'Close',
+								action: 'close'
+							}],
+							image: 'icon.png'
 						}
 					})
 				})).json();
