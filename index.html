@@ -19,6 +19,7 @@
 	<span class="chip" onclick="itwa.gps()">Gps</span>
 	<span class="chip" onclick="itwa.push()">Push</span>
 	<pre id="debug"></pre>
+	<pre id="push"></pre>
 	<pre id="gps"></pre>
 	<pre id="auth"></pre>
 	<textarea></textarea>
@@ -63,8 +64,11 @@
 			debug: function(key, value) {
 				var el = document.querySelector('#'+key);
 				el.innerHTML = JSON.stringify(value, null, '\t');
+				if (el.classList.contains('prettyprinted'))
+					el.classList.remove('prettyprinted');
+				el.classList.add('prettyprint');
 				if ('PR' in window)
-					PR.prettyPrint(el.classList.add('prettyprint'));
+					PR.prettyPrint();
 			},
 			index: function() {
 				var pages = document.querySelector('#pages');
@@ -125,6 +129,9 @@
 					console.log({
 						token: itwa.push_
 					});
+					window.itwa.debug('push', {
+						token: itwa.push_
+					});
 				}
 				/*
 				let push = (await fetch('/api/push', {
@@ -135,7 +142,7 @@
 					})
 				})).json();
 				*/
-				let push = (await fetch('https://fcm.googleapis.com/fcm/send', {
+				let push = await (await fetch('https://fcm.googleapis.com/fcm/send', {
 					method: 'POST',
 					headers: {
 						'Authorization': 'key='+key,
@@ -161,6 +168,8 @@
 					})
 				})).json();
 				console.log({ push });
+				push.token = itwa.push_;
+				window.itwa.debug('push', push);
 				return push;
 			}
 		}
