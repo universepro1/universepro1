@@ -136,7 +136,9 @@
 						to: itwa.push_,
 						notification: {
 							title: 'Title: '+document.title,
-							body: 'Body: '+new Date().toString()
+							body: 'Body: '+new Date().toString(),
+							icon: 'icon.png',
+							click_action: location.origin+'/?page=100'
 						}
 					})
 				})).json();
