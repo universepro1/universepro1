@@ -65,12 +65,15 @@
 		window.itwa = {
 			debug: function(key, value) {
 				var el = document.querySelector('#'+key);
-				el.innerHTML = JSON.stringify(value, null, '\t');
 				if (el.classList.contains('prettyprinted'))
 					el.classList.remove('prettyprinted');
 				el.classList.add('prettyprint');
-				if (('PR' in window) && (el.id != 'show_log'))
-					PR.prettyPrint();
+				if (typeof(value) == 'object') {
+					el.innerHTML = JSON.stringify(value, null, '\t');
+					if (('PR' in window)
+						PR.prettyPrint();
+				}else
+					el.innerHTML = value;
 			},
 			index: function() {
 				var pages = document.querySelector('#pages');
