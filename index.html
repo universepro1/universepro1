@@ -69,7 +69,7 @@
 				if (el.classList.contains('prettyprinted'))
 					el.classList.remove('prettyprinted');
 				el.classList.add('prettyprint');
-				if ('PR' in window)
+				if (('PR' in window) && (el.id != 'show_log'))
 					PR.prettyPrint();
 			},
 			index: function() {
