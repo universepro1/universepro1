@@ -112,78 +112,80 @@
 				else
 					throw new Error('Not found js bridge');
 			},
-			push: async function(data) {
+			push: function(data) {
 				if (data && data.token)
 					window.itwa.debug('push', {
 						token: (itwa.push_ = data.token)
 					});
 				else
-					try {
-						let key = 'AAAAb-JBOno:APA91bFCjRrWjhsa7jR9UC-JOhA9wT7IqzYy5V4DAY9D6HEz22Nh_sKuGCXODqn1I8GpQXmdOmbM_0qD8joPEjaymzp8BqFeNtdzgPgxxBcQnn7qg4QBJo3TbQEI3HmiZDilvN2qapW0';
-						if (!itwa.push_) {
-							let app = firebase.initializeApp({
-								apiKey: "AIzaSyCgJ0l6FCW2HaVaBV5Pnb5RdhiVhY3ejS0",
-								authDomain: "itwa-170d1.firebaseapp.com",
-								projectId: "itwa-170d1",
-								storageBucket: "itwa-170d1.appspot.com",
-								messagingSenderId: "480537295482",
-								appId: "1:480537295482:web:f2eb3ef0581651bb8219c3"
-							});
-							if (await Notification.requestPermission() !== 'granted')
-								console.log('user denied notifications');
-							itwa.push_ = await app.messaging().getToken();
-							console.log({
-								token: itwa.push_
-							});
+					(async function() {
+						try {
+							let key = 'AAAAb-JBOno:APA91bFCjRrWjhsa7jR9UC-JOhA9wT7IqzYy5V4DAY9D6HEz22Nh_sKuGCXODqn1I8GpQXmdOmbM_0qD8joPEjaymzp8BqFeNtdzgPgxxBcQnn7qg4QBJo3TbQEI3HmiZDilvN2qapW0';
+							if (!itwa.push_) {
+								let app = firebase.initializeApp({
+									apiKey: "AIzaSyCgJ0l6FCW2HaVaBV5Pnb5RdhiVhY3ejS0",
+									authDomain: "itwa-170d1.firebaseapp.com",
+									projectId: "itwa-170d1",
+									storageBucket: "itwa-170d1.appspot.com",
+									messagingSenderId: "480537295482",
+									appId: "1:480537295482:web:f2eb3ef0581651bb8219c3"
+								});
+								if (await Notification.requestPermission() !== 'granted')
+									console.log('user denied notifications');
+								itwa.push_ = await app.messaging().getToken();
+								console.log({
+									token: itwa.push_
+								});
+								window.itwa.debug('push', {
+									token: itwa.push_
+								});
+							}
+							/*
+							let push = (await fetch('/api/push', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({
+									token: (token || await enablePush())
+								})
+							})).json();
+							*/
+							let push = await (await fetch('https://fcm.googleapis.com/fcm/send', {
+								method: 'POST',
+								headers: {
+									'Authorization': 'key='+key,
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									to: itwa.push_,
+									notification: {
+										title: 'Title: '+document.title,
+										body: 'Body: '+new Date().toString(),
+										icon: 'icon.png',
+										click_action: location.origin+'/?page=100',
+										data: '?page=100',
+										actions: [{
+											title: 'Open',
+											action: 'open'
+										}, {
+											title: 'Close',
+											action: 'close'
+										}],
+										image: 'icon.png'
+									}
+								})
+							})).json();
+							console.log({ push });
+							push.token = itwa.push_;
+							window.itwa.debug('push', push);
+							return push;
+						} catch (e) {
+							console.error(e);
 							window.itwa.debug('push', {
-								token: itwa.push_
+								error: e.message
 							});
+							return null;
 						}
-						/*
-						let push = (await fetch('/api/push', {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({
-								token: (token || await enablePush())
-							})
-						})).json();
-						*/
-						let push = await (await fetch('https://fcm.googleapis.com/fcm/send', {
-							method: 'POST',
-							headers: {
-								'Authorization': 'key='+key,
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-								to: itwa.push_,
-								notification: {
-									title: 'Title: '+document.title,
-									body: 'Body: '+new Date().toString(),
-									icon: 'icon.png',
-									click_action: location.origin+'/?page=100',
-									data: '?page=100',
-									actions: [{
-										title: 'Open',
-										action: 'open'
-									}, {
-										title: 'Close',
-										action: 'close'
-									}],
-									image: 'icon.png'
-								}
-							})
-						})).json();
-						console.log({ push });
-						push.token = itwa.push_;
-						window.itwa.debug('push', push);
-						return push;
-					} catch (e) {
-						console.error(e);
-						window.itwa.debug('push', {
-							error: e.message
-						});
-						return null;
-					}
+					})();
 			}
 		}
 		window.itwa.index();
