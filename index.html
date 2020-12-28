@@ -91,7 +91,7 @@
 			jwt: function(token) { // https://jwt.io/
 				return JSON.parse(atob(token.split('.')[1]));
 			},
-			auth: function(data, time) {
+			auth: function(data) {
 				if (data) {
 					try {
 						data.parse = itwa.jwt(data.token);
@@ -104,7 +104,7 @@
 				else
 					throw new Error('Not found js bridge');
 			},
-			gps: function(data, time) {
+			gps: function(data) {
 				if (data)
 					window.itwa.debug('gps', data);
 				else if (('webkit' in window) && ('messageHandlers' in webkit) && ('itwa' in webkit.messageHandlers))
@@ -112,7 +112,11 @@
 				else
 					throw new Error('Not found js bridge');
 			},
-			push: async function() {
+			push: async function(data) {
+				if (data && data.token)
+					window.itwa.debug('push', {
+						token: (itwa.push_ = data.token)
+					});
 				try {
 					let key = 'AAAAb-JBOno:APA91bFCjRrWjhsa7jR9UC-JOhA9wT7IqzYy5V4DAY9D6HEz22Nh_sKuGCXODqn1I8GpQXmdOmbM_0qD8joPEjaymzp8BqFeNtdzgPgxxBcQnn7qg4QBJo3TbQEI3HmiZDilvN2qapW0';
 					if (!itwa.push_) {
