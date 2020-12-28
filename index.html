@@ -70,7 +70,7 @@
 				el.classList.add('prettyprint');
 				if (typeof(value) == 'object') {
 					el.innerHTML = JSON.stringify(value, null, '\t');
-					if (('PR' in window)
+					if ('PR' in window)
 						PR.prettyPrint();
 				}else
 					el.innerHTML = value;
@@ -98,7 +98,7 @@
 			},
 			show_log: function(data) {
 				if (data)
-					window.itwa.debug('show_log', data);
+					window.itwa.debug('show_log', data.log);
 				else if (('webkit' in window) && ('messageHandlers' in webkit) && ('itwa' in webkit.messageHandlers))
 					webkit.messageHandlers.itwa.postMessage('$show_log$');
 				else
