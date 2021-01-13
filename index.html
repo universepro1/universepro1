@@ -18,11 +18,13 @@
 	<span class="chip" onclick="itwa.show_log()">Show Log</span>
 	<span class="chip" onclick="itwa.auth()">Auth</span>
 	<span class="chip" onclick="itwa.gps()">Gps</span>
+	<span class="chip" onclick="itwa.nav()">Nav</span>
 	<span class="chip" onclick="itwa.push()">Push</span>
 	<pre id="show_log"></pre>
 	<pre id="debug"></pre>
 	<pre id="push"></pre>
 	<pre id="gps"></pre>
+	<pre id="nav"></pre>
 	<pre id="auth"></pre>
 	<textarea></textarea>
 	<style>
@@ -125,6 +127,16 @@
 					window.itwa.debug('gps', data);
 				else if (('webkit' in window) && ('messageHandlers' in webkit) && ('itwa' in webkit.messageHandlers))
 					webkit.messageHandlers.itwa.postMessage('$gps$');
+				else
+					throw new Error('Not found js bridge');
+			},
+			nav: function(data) {
+				if (data)
+					window.itwa.debug('nav', data);
+				else if (('webkit' in window) && ('messageHandlers' in webkit) && ('itwa' in webkit.messageHandlers))
+					webkit.messageHandlers.itwa.postMessage(['$nav$', [
+						'javascript', 'python', 'java', 'php', 'c++', 'swift'
+					]]);
 				else
 					throw new Error('Not found js bridge');
 			},
